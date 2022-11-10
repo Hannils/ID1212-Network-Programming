@@ -26,6 +26,11 @@ public class Speaker implements Runnable {
         System.out.println("Connected \n ----------");
         String message = scanner.nextLine();
         while (!message.equalsIgnoreCase("exit") && !socket.isClosed()) {
+            System.out.println("isBound: " + socket.isBound());
+            System.out.println("isClosed: " + socket.isClosed());
+            System.out.println("isConnected: " + socket.isConnected());
+            System.out.println("isInputShutdown: " + socket.isInputShutdown());
+            System.out.println("isOutputShutdown: " + socket.isOutputShutdown());
             try {
                 dataOutputStream.writeUTF(uname + ": " + message);
                 message = scanner.nextLine();
