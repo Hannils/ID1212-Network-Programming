@@ -23,7 +23,7 @@ public class Speaker implements Runnable {
     public void run() {
 
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Connected \n ----------");
+        System.out.println("Connected \n ----------"); 
         String message = scanner.nextLine();
         while (!message.equalsIgnoreCase("exit") && !socket.isClosed()) {
             try {
