@@ -9,7 +9,9 @@ public class View {
     private Map<Integer, String> httpResponseStatusMessages = Map.of(
             200, "OK",
             400, "Bad Request",
-            404, "Not Found");
+            404, "Not Found",
+            405, "Method Not Allowed",
+            505, "HTTP Version Not Supported");
 
     public View(PrintWriter printer) {
         this.printer = printer;

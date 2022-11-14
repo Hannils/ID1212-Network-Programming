@@ -4,11 +4,15 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import game.controller.Controller;
+import game.model.Game;
+import game.model.Model;
+
 public class App {
     private static ServerSocket socket;
 
     public static void main(String[] args) {
-        HashMap<String, Model> games = new HashMap<String, Model>();
+        Model model = new Model();
         try {
             socket = new ServerSocket(8090);
             System.out.println("Server started on port " + socket.getLocalPort());
@@ -25,7 +29,7 @@ public class App {
 
                 View view = new View(new PrintWriter(clientSocket.getOutputStream()));
 
-                Runnable r = new Controller(clientSocket, games, view);
+                Runnable r = new Controller(clientSocket, model, view);
                 new Thread(r).start();
             } catch (IOException e) {
                 e.printStackTrace();
