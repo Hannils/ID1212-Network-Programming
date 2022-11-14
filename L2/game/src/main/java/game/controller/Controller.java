@@ -47,16 +47,23 @@ public class Controller implements Runnable {
                 return;
             }
 
-            if (gameController.canHandle(metaline.getMethod(), metaline.getPath())) {
-                gameController.handle(metaline.getMethod(), metaline.getPath(), body, headers);
+            try {
+                if (gameController.canHandle(metaline.getMethod(), metaline.getPath())) {
+                    gameController.handle(metaline.getMethod(), metaline.getPath(), body, headers);
 
-                socket.close();
-                return;
-            }
+                    socket.close();
+                    return;
+                }
 
-            if (staticController.canHandle(metaline.getMethod(), metaline.getPath())) {
-
-                socket.close();
+                if (staticController.canHandle(metaline.getMethod(), metaline.getPath())) {
+                    staticController.handle(metaline.getPath());
+                    socket.close();
+                    return;
+                }
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+                e.printStackTrace();
+                view.sendResponse(500, View.getBasicHttpHeaders(), "Internal server error");
                 return;
             }
 
@@ -117,7 +124,6 @@ public class Controller implements Runnable {
         String line = null;
         HashMap<String, String> headers = new HashMap<String, String>();
         while ((line = reader.readLine()).length() != 0) {
-            System.out.println(line);
 
             String[] values = line.split(": ");
 

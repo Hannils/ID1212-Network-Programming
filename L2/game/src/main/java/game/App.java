@@ -19,8 +19,6 @@ public class App {
         } catch (IOException e) {
             System.err.println("Error starting socket");
             e.printStackTrace();
-        } catch (Exception e) {
-            System.err.println("Check arguments! \n" + e);
         }
 
         while (true) {
