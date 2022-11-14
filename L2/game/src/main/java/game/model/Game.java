@@ -13,10 +13,12 @@ public class Game {
         numberOfGuesses = 0;
         response = null;
     }
-
+    /**
+     * Checks the conditions for an entered guess
+     * @param guess The int of which to check
+     */
     public void guess(int guess) {
         numberOfGuesses++;
-        System.out.println("Kommer hit! " + target + "  " + numberOfGuesses);
         if (guess > target)
             response = "LOWER";
         else if (guess < target)

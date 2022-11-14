@@ -21,8 +21,4 @@ public class Model {
     public void removeGame(String gameId) {
         games.remove(gameId);
     }
-
-    public void printGames() {
-        System.out.println(games.keySet().toString());
-    }
 }

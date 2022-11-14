@@ -18,6 +18,13 @@ public class View {
         this.printer = printer;
     }
 
+
+    /**
+     * Function which sends the response when a request is done
+     * @param code Statuscode to send along
+     * @param headers The headers to send along
+     * @param message The message to send along with the code
+     */
     public void sendResponse(int code, HashMap<String, String> headers, String message) {
         String firstLine = "HTTP/1.1 " + code + " " + httpResponseStatusMessages.get(code) + "\r\n";
 
@@ -35,12 +42,15 @@ public class View {
         String headerString = headerLines.size() == 0 ? "" : String.join("\r\n", headerLines);
 
         String finalMessage = firstLine + headerString + "\r\n\r\n" + message;
-        System.out.println(finalMessage);
         printer.write(finalMessage);
         printer.flush();
 
     }
 
+    /**
+     * Puts the necessary HTTP headers into a hashmap
+     * @return The hashmap with the necessary HTTP headers
+     */
     public static HashMap<String, String> getBasicHttpHeaders() {
         HashMap<String, String> basicHeaders = new HashMap<String, String>();
         basicHeaders.put("Content-Type", "text/plain");

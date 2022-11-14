@@ -19,6 +19,12 @@ public class StaticController {
         this.view = view;
     }
 
+    /**
+     * Checks if the StaticController can handle the given method and path
+     * @param method The method of which to check
+     * @param path The path of which to check
+     * @return true or false
+     */
     public boolean canHandle(String method, String path) {
         if (!method.equals("GET"))
             return false;
@@ -29,11 +35,14 @@ public class StaticController {
                 return true;
             }
         }
-
-        System.out.println();
         return false;
     }
 
+    /**
+     * Executes only if the controller can handle the given method and path
+     * Renders the .html and .js static files
+     * @param path the path for the file
+     */
     public void handle(String path) {
         String requestedFileName = path.substring(1);
         File requestedFile = null;
@@ -58,12 +67,8 @@ public class StaticController {
             }
             scanner.close();
 
-            System.out.println(response);
-
             HashMap<String, String> headers = View.getBasicHttpHeaders();
-            System.out.println(fileExtension);
             String contentType = contentTypes.get(fileExtension);
-            System.out.println(contentType);
             headers.put("Content-Type", contentType == null ? "text/plain" : contentType);
 
             view.sendResponse(200, headers, response.toString());
