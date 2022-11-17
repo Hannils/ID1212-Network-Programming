@@ -1,88 +1,98 @@
-import javax.net.ssl.*;
-import java.util.*;
-import java.net.*;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
+import java.net.Socket;
+import java.time.LocalTime;
+import java.util.Base64;
 
 public class Send {
+    static private PrintWriter pw;
+    static private BufferedReader buffer;
     private static final String HOST = "smtp.kth.se";
     private static final int PORT = 587;
-    private static BufferedReader in = null;
-    private static PrintWriter out = null;
-    private static Socket client;
-    private static int commandPrefix = 0;
     private static String username;
+    private static String receiver;
+    private static String toSend;
+    public static void main(String[] args) throws IOException, InterruptedException {
+        Console console = System.console();
+        username = console.readLine("Enter your username (without @kth.se): ");
+        String password = new String(console.readPassword("Enter your password: "));
+        String receiver = console.readLine("Enter username of receiver (without @kth.se): ");
+        String toSend = console.readLine("Enter message to send: \n");
 
-    public static void main(String[] args) {
-        ArrayList<String> data;
-        try {
-            Console console = System.console();
-            username = console.readLine("Enter your username (without @kth.se): ");
-            String password = new String(console.readPassword("Enter your password: "));
 
-            client = new Socket(HOST, PORT);
-            System.out.println("Connect to Host");
+        Socket socket = new Socket(HOST, PORT);
+        System.out.println("Connect to host");
 
-            in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            out = new PrintWriter(client.getOutputStream());
+        pw = new PrintWriter(socket.getOutputStream());
+        buffer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            writeToServer("EHLO " + HOST);
-            readFromServer();
-            writeToServer("STARTTLS");
-            readFromServer();
+        writeToServer("EHLO " + HOST);
+        readFromServer();
+        writeToServer("STARTTLS");
+        readFromServer();
 
-            SSLSocketFactory ssf = (SSLSocketFactory) SSLSocketFactory.getDefault();
-            client = ssf.createSocket(client, client.getInetAddress().getHostAddress(), client.getPort(), true);
-            out = new PrintWriter(client.getOutputStream());
-            in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            writeToServer("EHLO " + HOST);
-            writeToServer("AUTH LOGIN");
-            writeToServer(Base64.getEncoder().encodeToString(username.getBytes()));
-            writeToServer(Base64.getEncoder().encodeToString(password.getBytes()));
-            readFromServer();
-            writeMail("Hejsan", "", "Nothing");
-            readFromServer();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void writeToServer(String message) {
-        System.out.println("Client: " + message);
-        out.print(message + "\r\n");
-        out.flush();
-    }
-
-    private static ArrayList<String> readFromServer() throws IOException {
-        String message;
-        ArrayList<String> messages = new ArrayList<String>();
-
-        while ((message = in.readLine()) != null) {
-            System.out.println("Server: " + message);
-            messages.add(message);
-
-            if (message.contains("220") || message.contains("235"))
+        //Takes some input from the buffer
+        String msg = "";
+        while((msg=buffer.readLine()) != null){
+            System.out.println(msg);
+            if(msg.contains("220 2.0.0"))
                 break;
         }
 
-        return messages;
+        SSLSocketFactory ssf = (SSLSocketFactory) SSLSocketFactory.getDefault();
+        SSLSocket sslSocket = (SSLSocket) ssf.createSocket(socket, socket.getInetAddress().getHostAddress(), socket.getPort(), true);
+
+        pw = new PrintWriter(sslSocket.getOutputStream(), true);
+        buffer = new BufferedReader(new InputStreamReader(sslSocket.getInputStream()));
+
+        writeToServer("EHLO " + HOST);
+        readFromServer();
+        writeToServer("AUTH LOGIN");
+        readFromServer();
+        writeToServer(Base64.getEncoder().encodeToString(username.getBytes()));
+        readFromServer();
+        writeToServer(Base64.getEncoder().encodeToString(password.getBytes()));
+        readFromServer();
+
+        msg = "";
+        while((msg=buffer.readLine()) != null){
+            System.out.println(msg);
+            if(msg.contains("334")){        //prints until 334
+                System.out.println(buffer.readLine()+"\n"+buffer.readLine());
+                writeToServer("MAIL FROM:<" + username + "@kth.se>");
+                readFromServer();
+                writeToServer("RCPT TO:<" + username + "@kth.se>");
+                readFromServer();
+                writeToServer("RCPT TO:<" + receiver + "@kth.se>");
+                readFromServer();
+                writeToServer("DATA");
+                readFromServer();
+                writeToServer("Date: "+ LocalTime.now());
+                writeToServer("From: SMTP User <" + username + "@kth.se>");
+                writeToServer("Subject: SMTP");
+                writeToServer("To: " + receiver + "@kth.se");
+                writeToServer("");
+                writeToServer(toSend + "\r\n.");
+                writeToServer("QUIT");
+            }
+
+        }
+        System.out.println("END");
+        pw.close();
+        buffer.close();
+        socket.close();
+        sslSocket.close();
+
+    }
+    static void writeToServer(String msg) throws IOException {
+        pw.println(msg);
+        pw.flush();
+        System.out.println(msg);
     }
 
-
-    private static void writeMail(String message, String rcpt, String subject) throws IOException {
-        out.println("MAIL FROM: <mail@kth.se>");
-        out.flush();
-        out.println("rcpt to: <mail@kth.se>");
-        out.flush();
-        out.print("data \r\n");
-        out.flush();
-        out.println("subject: ");
-        out.print(".");
-        //out.print("asddsa");
-        //out.print(".");
-        //out.print("\r\n.");
-        out.flush();
-        //out.println("Subject: " + subject + "\n" + message + "\n.");
-        //out.flush();
+    static void readFromServer() throws IOException {
+        System.out.println(buffer.readLine());
     }
 }
+
