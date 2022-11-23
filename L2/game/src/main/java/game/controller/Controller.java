@@ -1,6 +1,7 @@
 package game.controller;
 
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import game.HTTPException;
@@ -33,17 +34,17 @@ public class Controller implements Runnable {
         try {
             InputStreamReader isReader = new InputStreamReader(socket.getInputStream());
             BufferedReader reader = new BufferedReader(isReader);
-            String body;
-
-            System.out.println("Controller");
+            String body = "";
 
             try {
                 metaline = new HTTPMetaLine(reader.readLine());
-                System.out.println(metaline);
                 headers = readHeaders(reader);
-                System.out.println(headers);
-                body = readPayload(reader);
-                System.out.println(body);
+                String contentLengthString = headers.get("Content-Length");
+                int contentLength = 0;
+                if (contentLengthString != null) {
+                    contentLength = Integer.parseInt(contentLengthString);
+                    body = readPayload(reader, contentLength);
+                }
             } catch (NumberFormatException e) {
                 view.sendResponse(400, View.getBasicHttpHeaders(), "Write a number");
                 return;
@@ -106,19 +107,13 @@ public class Controller implements Runnable {
      * @param reader A buffered reader used for reading and parsing the incoming
      *               request
      */
-    protected static String readPayload(BufferedReader reader) {
-        StringBuilder payload = new StringBuilder();
-        try {
-            System.out.println("Before ready");
-            while (reader.ready()) {
-                System.out.println("Appending");
-                payload.append((char) reader.read());
-                System.out.println("payload: " + payload);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    protected static String readPayload(BufferedReader reader, int contentLength) throws IOException, HTTPException {
+        char[] payload = new char[contentLength];
+        int res = reader.read(payload, 0, contentLength);
+        if(res != contentLength) {
+            throw new HTTPException(400, "Unable to parse body correctly");
         }
-        return payload.toString();
+        return new String(payload);
     }
 
     /**

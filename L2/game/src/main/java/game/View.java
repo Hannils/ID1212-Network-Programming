@@ -43,7 +43,6 @@ public class View {
 
         String finalMessage = firstLine + headerString + "\r\n\r\n" + message;
 
-        System.out.println("responding: \n\n" + finalMessage);
         printer.write(finalMessage);
         printer.flush();
 

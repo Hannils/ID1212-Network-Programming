@@ -24,12 +24,8 @@ public class App {
             while (true) {
                 SSLSocket clientSocket = (SSLSocket) serverSocket.accept();
 
-                System.out.println("Accepted");
-                
                 View view = new View(new PrintWriter(clientSocket.getOutputStream()));
 
-                System.out.println("View created");
-                
                 Runnable r = new Controller(clientSocket, model, view);
                 new Thread(r).start();
             }
@@ -68,5 +64,7 @@ public class App {
     }
 }
 
-// keytool -genkey -keyalg RSA -keystore ~/key.pem -storetype PKCS12 -storepass abc123 -validity 365 -alias test
-// keytool -exportcert -keystore ~/key.pem -storetype pkcs12 -storepass abc123 -alias test -file ~/kth.cer
+// keytool -genkey -keyalg RSA -keystore ~/key.pem -storetype PKCS12 -storepass
+// abc123 -validity 365 -alias test
+// keytool -exportcert -keystore ~/key.pem -storetype pkcs12 -storepass abc123
+// -alias test -file ~/kth.cer
