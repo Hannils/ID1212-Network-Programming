@@ -44,7 +44,11 @@ public class GameController {
      */
     public void handle(String method, String path, String body, HashMap<String, String> headers) {
         if (method.equals("POST") && path.equals("/game/guess")) {
-            handleGuess(headers, Integer.parseInt(body));
+            try {
+                handleGuess(headers, Integer.parseInt(body));
+            } catch (Exception e) {
+                
+            }
         }
 
         if (method.equals("GET") && path.equals("/game/guess")) {

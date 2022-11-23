@@ -34,10 +34,10 @@ public class HTTPUrlConnection {
 			if (status.equals("HIGHER")) {
 				guess += 10;
 			} else if (status.equals("LOWER")) {
-				guess -= 1;
+				guess--;
 			}
+			System.out.println(status);
 		} while (!status.equals("WIN"));
-
 		return getGuesses(res);
 	}
 
@@ -69,7 +69,8 @@ public class HTTPUrlConnection {
 				}
 				return response.toString();
 			} else {
-				System.err.println("POST request not worked");
+				System.out.println("POST fialed, trying again...");
+				return POST(guess);
 			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();

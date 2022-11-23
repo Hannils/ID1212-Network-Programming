@@ -36,7 +36,7 @@ public class Send {
         String msg = "";
         while((msg=buffer.readLine()) != null){
             System.out.println(msg);
-            if(msg.contains("220 2.0.0"))
+            if(msg.contains("220") && msg.contains("2.0.0"))
                 break;
         }
 
