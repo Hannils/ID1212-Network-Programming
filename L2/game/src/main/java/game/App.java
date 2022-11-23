@@ -24,8 +24,12 @@ public class App {
             while (true) {
                 SSLSocket clientSocket = (SSLSocket) serverSocket.accept();
 
+                System.out.println("Accepted");
+                
                 View view = new View(new PrintWriter(clientSocket.getOutputStream()));
 
+                System.out.println("View created");
+                
                 Runnable r = new Controller(clientSocket, model, view);
                 new Thread(r).start();
             }
@@ -38,13 +42,13 @@ public class App {
     private static ServerSocket getServerSocket(InetSocketAddress address)
             throws Exception {
 
-        Path keyStorePath = Path.of("/Users/hampus.nilsson/test.pfx");
+        Path keyStorePath = Path.of("/Users/kalleelmdahl/key.pem");
         char[] keyStorePassword = "abc123".toCharArray();
 
         // Bind the socket to the given port and address
         ServerSocket serverSocket = getSslContext(keyStorePath, keyStorePassword)
                 .getServerSocketFactory()
-                .createServerSocket(address.getPort(), 0, address.getAddress());
+                .createServerSocket(address.getPort(), 10, address.getAddress());
         return serverSocket;
     }
 
@@ -63,3 +67,6 @@ public class App {
         return sslContext;
     }
 }
+
+// keytool -genkey -keyalg RSA -keystore ~/key.pem -storetype PKCS12 -storepass abc123 -validity 365 -alias test
+// keytool -exportcert -keystore ~/key.pem -storetype pkcs12 -storepass abc123 -alias test -file ~/kth.cer

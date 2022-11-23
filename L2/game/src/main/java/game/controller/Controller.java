@@ -35,10 +35,15 @@ public class Controller implements Runnable {
             BufferedReader reader = new BufferedReader(isReader);
             String body;
 
+            System.out.println("Controller");
+
             try {
                 metaline = new HTTPMetaLine(reader.readLine());
+                System.out.println(metaline);
                 headers = readHeaders(reader);
+                System.out.println(headers);
                 body = readPayload(reader);
+                System.out.println(body);
             } catch (NumberFormatException e) {
                 view.sendResponse(400, View.getBasicHttpHeaders(), "Write a number");
                 return;
@@ -104,8 +109,11 @@ public class Controller implements Runnable {
     protected static String readPayload(BufferedReader reader) {
         StringBuilder payload = new StringBuilder();
         try {
+            System.out.println("Before ready");
             while (reader.ready()) {
+                System.out.println("Appending");
                 payload.append((char) reader.read());
+                System.out.println("payload: " + payload);
             }
         } catch (IOException e) {
             e.printStackTrace();

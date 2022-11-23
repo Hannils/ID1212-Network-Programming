@@ -12,7 +12,7 @@ form.addEventListener("submit", e => {
 	const guess = new FormData(e.target).get("guess")
 	if (!guess) return
 
-	fetch("http://localhost:8090/game/guess", {
+	fetch("https://localhost:8090/game/guess", {
 		method: "POST",
 		body: guess,
 		credentials: "include",
@@ -25,7 +25,7 @@ form.addEventListener("submit", e => {
 		})
 })
 
-fetch("http://localhost:8090/game/guess", {
+fetch("https://localhost:8090/game/guess", {
 	credentials: "include",
 })
 	.then(res => (res.ok ? res.json() : console.error(`${res.status}: ${res.statusText}`)))

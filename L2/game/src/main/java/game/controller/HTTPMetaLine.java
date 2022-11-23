@@ -49,4 +49,8 @@ public class HTTPMetaLine {
     public String getProtocol() {
         return this.protocol;
     }
+
+    public String toString() {
+        return method + " " + path + " " + protocol;
+    }
 }
