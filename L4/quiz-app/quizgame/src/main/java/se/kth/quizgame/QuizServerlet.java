@@ -7,6 +7,7 @@ package se.kth.quizgame;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,31 +52,44 @@ public class QuizServerlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession(true);
-        
+
         String receivedUsername = request.getParameter("username");
         String receivedPassword = request.getParameter("password");
-        
-        
-        if(receivedUsername != null && receivedPassword != null) {
+
+        if (receivedUsername != null && receivedPassword != null) {
             UserBean user = database.findUser(receivedUsername, receivedPassword);
-            if(user != null) {
+            if (user != null) {
                 session.setAttribute("userBean", user);
+                response.sendRedirect("/quizgame/quiz");
+                return;
             }
         }
-        
-        
+
         UserBean user = (UserBean) session.getAttribute("userBean");
 
         if (user == null) {
             System.out.println("Not logged in");
 
         } else {
+            if (session.getAttribute("quizzes") == null) {
+                ArrayList<QuizBean> quizzes = database.getQuizzes();
+                session.setAttribute("quizzes", quizzes);
+            }
+
+            if (request.getParameter("category") != null) {
+                ArrayList<QuestionBean> questions = database.getQuestions(
+                        Integer.parseInt(request.getParameter("category"))
+                );
+                
+                
+                session.setAttribute("questions", questions);
+                response.sendRedirect("/quizgame/quiz");
+                return;
+            }
             System.out.println("currentUser: " + user.getUsername() + " id: " + user.getId());
         }
 
         RequestDispatcher requestDispatcher = request.getRequestDispatcher("index.jsp");
-        
-        
 
         requestDispatcher.forward(request, response);
     }
