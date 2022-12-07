@@ -26,6 +26,8 @@ class Dao {
     private PreparedStatement getUserByCredentials;
     private PreparedStatement getQuizzes;
     private PreparedStatement getQuestions;
+    private PreparedStatement addResult;
+    private PreparedStatement getResults;
 
     public Dao(int port, String databaseName) throws SQLException {
         connect(port, databaseName);
@@ -80,17 +82,17 @@ class Dao {
 
     }
 
-    public ArrayList<QuestionBean> getQuestions(int categoryId) {
-        ArrayList<QuestionBean> questions = new ArrayList<>();
+    public ArrayList<Question> getQuestions(int categoryId) {
+        ArrayList<Question> questions = new ArrayList<>();
         try {
             getQuestions.setInt(1, categoryId);
             ResultSet result = getQuestions.executeQuery();
             while (result.next()) {
-                QuestionBean question = new QuestionBean(
+                Question question = new Question(
                         result.getString("answer"),
                         (String[]) result.getArray("options").getArray(),
                         result.getString("text"));
-                System.out.println("FOund question: " + question.getText());
+                System.out.println("Fuund question: " + question.getText());
 
                 questions.add(question);
             }
@@ -99,6 +101,39 @@ class Dao {
         }
 
         return questions;
+    }
+
+    public void addResult(int userId, int quizId, int score) {
+        try {
+            addResult.setInt(1, userId);
+            addResult.setInt(2, quizId);
+            addResult.setInt(3, score);
+            addResult.executeQuery();
+        } catch (SQLException ex) {
+            Logger.getLogger(Dao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public ArrayList<ResultBean> getResults(int userId) {
+        ArrayList<ResultBean> results = new ArrayList<>();
+        try {
+            getResults.setInt(1, userId);
+            ResultSet result = getResults.executeQuery();
+            
+            while (result.next()) {
+                ResultBean resultBean = new ResultBean(
+                        result.getString("subject"),
+                        result.getInt("score"),
+                        result.getInt("number_of_questions"));
+                
+
+                results.add(resultBean);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Dao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return results;
     }
 
     private void connect(int port, String databaseName) throws SQLException {
@@ -125,6 +160,16 @@ class Dao {
 
         getQuestions = conn.prepareStatement(
                 "SELECT text, options, answer FROM selector INNER JOIN questions ON id=question_id WHERE quiz_id=?"
+        );
+
+        addResult = conn.prepareStatement("INSERT INTO results (user_id, quiz_id, score) VALUES (?, ?, ?);");
+
+        getResults = conn.prepareStatement(
+                "SELECT subject, score, count(results.id) as number_of_questions FROM results "
+                + "INNER JOIN quizzes on quizzes.id=results.quiz_id "
+                + "INNER JOIN selector ON selector.quiz_id=quizzes.id "
+                + "WHERE user_id=? "
+                + "GROUP BY results.id, subject, score"
         );
 
     }

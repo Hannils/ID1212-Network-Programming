@@ -15,15 +15,13 @@ public class QuestionBean {
 
     private String text;
     String[] options;
-    String answer;
 
     public QuestionBean() {
     }
 
-    public QuestionBean(String answer, String[] options, String text) {
+    public QuestionBean(String text, String[] options) {
         this.text = text;
         this.options = options;
-        this.answer = answer;
     }
 
     /**
@@ -37,10 +35,6 @@ public class QuestionBean {
     
     public String[] getOptions() {
         return options;
-    }
-
-    public String getAnswer() {
-        return answer;
     }
 
 

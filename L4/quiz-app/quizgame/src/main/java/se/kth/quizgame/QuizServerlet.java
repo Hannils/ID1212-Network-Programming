@@ -27,9 +27,11 @@ import javax.servlet.http.HttpSession;
 public class QuizServerlet extends HttpServlet {
 
     private Dao database;
+    private HashMap<String, Quiz> activeQuizzes;
 
     @Override
     public void init() {
+        activeQuizzes = new HashMap<>();
 
         try {
             database = new Dao(5432, "id1212");
@@ -71,22 +73,55 @@ public class QuizServerlet extends HttpServlet {
             System.out.println("Not logged in");
 
         } else {
+
+            // Inital load
             if (session.getAttribute("quizzes") == null) {
                 ArrayList<QuizBean> quizzes = database.getQuizzes();
                 session.setAttribute("quizzes", quizzes);
             }
+            
+            if (session.getAttribute("results") == null) {
+                ArrayList<ResultBean> results = database.getResults(user.getId());
+                session.setAttribute("results", results);
+            }
 
+            // USer selected category
             if (request.getParameter("category") != null) {
-                ArrayList<QuestionBean> questions = database.getQuestions(
-                        Integer.parseInt(request.getParameter("category"))
+                int selectedCategory = Integer.parseInt(request.getParameter("category"));
+
+                ArrayList<Question> questions = database.getQuestions(
+                        selectedCategory
                 );
-                
-                
-                session.setAttribute("questions", questions);
+
+                Quiz quiz = new Quiz(selectedCategory, questions);
+                activeQuizzes.put(session.getId(), quiz);
+
+                session.setAttribute("selectedCategory", selectedCategory);
+                session.setAttribute("questions", quiz.getQuestionBeans());
                 response.sendRedirect("/quizgame/quiz");
                 return;
             }
-            System.out.println("currentUser: " + user.getUsername() + " id: " + user.getId());
+
+            Quiz activeQuiz = activeQuizzes.get(session.getId());
+
+            // user submitted quiz
+            if (activeQuiz != null && request.getParameter("question1") != null) {
+                ArrayList<String> answers = new ArrayList<>();
+                for (int i = 0; i < activeQuiz.getNumberOfQuestions(); i++) {
+                    answers.add(
+                            request.getParameter("question" + (i + 1))
+                    );
+                }
+
+                database.addResult(user.getId(), activeQuiz.getId(),
+                        activeQuiz.getScore(answers)
+                );
+                activeQuizzes.remove(session.getId());
+                session.removeAttribute("questions");
+                session.removeAttribute("results");
+                response.sendRedirect("/quizgame/quiz");
+                return;
+            }
         }
 
         RequestDispatcher requestDispatcher = request.getRequestDispatcher("index.jsp");
