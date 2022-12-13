@@ -20,9 +20,17 @@ public class Lab5 {
 
     public static void main(String[] args) throws MessagingException, IOException {
         Console console = System.console();
-        String username = "kelmdahl";
-        String password = "9WpJhN32yHfv";
+        String username = console.readLine();
+        String password = new String(console.readPassword());
         PasswordAuthentication auth = new PasswordAuthentication(username, password);
+        if (false) {
+            printLatestMessage(auth);
+        } else {
+            sendMessage(auth);
+        }
+    }
+
+    private static void printLatestMessage(PasswordAuthentication auth) throws MessagingException, IOException {
         Folder folder = null;
         Store store = null;
         try {
@@ -61,6 +69,43 @@ public class Lab5 {
             if (store != null) {
                 store.close();
             }
+        }
+    }
+
+    private static void sendMessage(PasswordAuthentication auth) throws MessagingException, IOException {
+
+        // Create the properties object
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.kth.se");
+        props.put("mail.smtp.port", 587);
+        props.put("mail.smtp.starttls.enable", true);
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.auth", true);
+        props.setProperty("mail.debug", "true");
+
+        // Create the session object
+        Authenticator authenticator = new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return auth;
+            }
+        };
+        Session session = Session.getInstance(props, authenticator);
+
+        try {
+            // Create the message
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress("kelmdahl@kth.se"));
+            message.addRecipient(Message.RecipientType.TO,
+                    new InternetAddress("hamnilss@kth.se"));
+            message.setSubject("Hello World!");
+            message.setText("This is a test message from JavaMail.");
+
+            // Send the message
+            Transport.send(message);
+            System.out.println("Message sent successfully!");
+        } catch (MessagingException e) {
+            System.out.println("An error occurred while sending the message: \n" + e.getMessage());
         }
     }
 }
