@@ -40,19 +40,20 @@ public class Lab5 {
             store = imapSession.getStore("imap");
             //Connect to server by sending username and password.
 
+            System.out.println("Starting to connect...");
             store.connect("webmail.kth.se", auth.getUserName(), auth.getPassword());
             //Get all mails in Inbox Forlder
             folder = store.getFolder("Inbox");
             folder.open(Folder.READ_ONLY);
             //Return result to array of message
-            Message messages[] = folder.getMessages();
+            Message mostRecentMessage = folder.getMessage(folder.getMessageCount());
             System.out.println("No of Messages : " + folder.getMessageCount());
             System.out.println("No of Unread Messages : " + folder.getUnreadMessageCount());
-            for (int i = 0; i < messages.length; ++i) {
-                System.out.println("MESSAGE #" + (i + 1) + ":");
-                Message msg = messages[i];
-                System.out.println(msg.getContent());
-            }
+            System.out.println("MESSAGE:");
+            System.out.println("Subject:" + mostRecentMessage.getSubject());
+            MimeMultipart mp = (MimeMultipart) mostRecentMessage.getContent();
+            System.out.println("Content: " + mp.getBodyPart(0).getContent());
+
         } finally {
             if (folder != null) {
                 folder.close(true);
