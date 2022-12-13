@@ -17,11 +17,10 @@ import javax.mail.internet.*;
  * @author kalleelmdahl
  */
 public class Lab5 {
-
+    
     public static void main(String[] args) throws MessagingException, IOException {
-        Console console = System.console();
-        String username = console.readLine();
-        String password = new String(console.readPassword());
+        String username = getUserName();
+        String password = getPassword();
         PasswordAuthentication auth = new PasswordAuthentication(username, password);
         if (false) {
             printLatestMessage(auth);
@@ -107,5 +106,20 @@ public class Lab5 {
         } catch (MessagingException e) {
             System.out.println("An error occurred while sending the message: \n" + e.getMessage());
         }
+    }
+    
+    
+    
+    
+    
+    /*SECRET STUFF BELOW*/
+    
+    
+    private static String getUserName() {
+        return "Your username without @kth.se";
+    }
+    
+    private static String getPassword() {
+        return "Your password";
     }
 }
