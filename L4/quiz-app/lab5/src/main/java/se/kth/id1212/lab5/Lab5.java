@@ -22,7 +22,7 @@ public class Lab5 {
         String username = getUserName();
         String password = getPassword();
         PasswordAuthentication auth = new PasswordAuthentication(username, password);
-        if (false) {
+        if (true) {
             printLatestMessage(auth);
         } else {
             sendMessage(auth);
@@ -107,19 +107,54 @@ public class Lab5 {
             System.out.println("An error occurred while sending the message: \n" + e.getMessage());
         }
     }
-    
-    
-    
-    
-    
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    // 
+
     /*SECRET STUFF BELOW*/
     
-    
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
     private static String getUserName() {
-        return "Your username without @kth.se";
+        return "Your username here";
     }
     
     private static String getPassword() {
-        return "Your password";
+        return "Your password here";
     }
 }
