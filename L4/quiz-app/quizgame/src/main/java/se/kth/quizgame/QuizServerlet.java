@@ -6,11 +6,15 @@ package se.kth.quizgame;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -28,6 +32,7 @@ public class QuizServerlet extends HttpServlet {
 
     private Dao database;
     private HashMap<String, Quiz> activeQuizzes;
+    private EntityManagerFactory entityManagerFactory;
 
     @Override
     public void init() {
@@ -35,6 +40,8 @@ public class QuizServerlet extends HttpServlet {
 
         try {
             database = new Dao(5432, "id1212");
+
+            entityManagerFactory = Persistence.createEntityManagerFactory("se.kth_quizgame_war_1.0-SNAPSHOTPU");
         } catch (SQLException ex) {
             System.out.println("Could not connect to db: " + ex.getMessage());
             Logger.getLogger(QuizServerlet.class.getName()).log(Level.SEVERE, null, ex);
@@ -79,7 +86,7 @@ public class QuizServerlet extends HttpServlet {
                 ArrayList<QuizBean> quizzes = database.getQuizzes();
                 session.setAttribute("quizzes", quizzes);
             }
-            
+
             if (session.getAttribute("results") == null) {
                 ArrayList<ResultBean> results = database.getResults(user.getId());
                 session.setAttribute("results", results);
@@ -113,9 +120,20 @@ public class QuizServerlet extends HttpServlet {
                     );
                 }
 
-                database.addResult(user.getId(), activeQuiz.getId(),
-                        activeQuiz.getScore(answers)
-                );
+                Users pUser = new Users();
+                pUser.setId((long) user.getId());
+                Quizzes pQuiz = new Quizzes();
+                pQuiz.setId((long) activeQuiz.getId());
+                Results pResult = new Results();
+                pResult.setQuizId(pQuiz);
+                pResult.setUserId(pUser);
+                pResult.setScore(new BigInteger("" + activeQuiz.getScore(answers)));
+                EntityManager entityManager = entityManagerFactory.createEntityManager();
+                entityManager.getTransaction().begin();
+                entityManager.persist(pResult);
+                entityManager.getTransaction().commit();
+                entityManager.close();
+                
                 activeQuizzes.remove(session.getId());
                 session.removeAttribute("questions");
                 session.removeAttribute("results");
